@@ -127,8 +127,8 @@ cdef class Packer(object):
                     ret = self._pack(v)
                     if ret != 0: break
         else:
-            # TODO: Serialize with defalt() like simplejson.
-            raise TypeError, "can't serialize %r" % (o,)
+            v = self.default(o)
+            ret = self._pack(v)
         return ret
 
     def pack(self, object obj):
@@ -139,6 +139,9 @@ cdef class Packer(object):
         buf = PyBytes_FromStringAndSize(self.pk.buf, self.pk.length)
         self.pk.length = 0
         return buf
+
+    def default(self, object obj):
+        raise TypeError, "can't serialize %r" % (obj,)
 
 
 def pack(object o, object stream):
@@ -156,6 +159,7 @@ packs = packb
 cdef extern from "unpack.h":
     ctypedef struct msgpack_user:
         int use_list
+        PyObject* unpacker
 
     ctypedef struct template_context:
         msgpack_user user
@@ -178,6 +182,8 @@ def unpackb(bytes packed_bytes):
     cdef int ret
     template_init(&ctx)
     ctx.user.use_list = 0
+    ctx.user.unpacker = NULL
+
     ret = template_execute(&ctx, p, len(packed_bytes), &off)
     if ret == 1:
         return template_data(&ctx)
@@ -202,6 +208,7 @@ cdef class UnpackIterator(object):
 
     def __iter__(self):
         return self
+
 
 cdef class Unpacker(object):
     """Unpacker(file_like=None, read_size=1024*1024)
@@ -255,6 +262,10 @@ cdef class Unpacker(object):
         self.buf_tail = 0
         template_init(&self.ctx)
         self.ctx.user.use_list = use_list
+        self.ctx.user.unpacker = <PyObject*>self
+
+    def array_cb(self, obj):
+        return None
 
     def feed(self, bytes next_bytes):
         self.waiting_bytes.append(next_bytes)

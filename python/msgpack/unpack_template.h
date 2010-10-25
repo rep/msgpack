@@ -128,7 +128,6 @@ msgpack_unpack_func(int, _execute)(msgpack_unpack_struct(_context)* ctx, const c
     stack[top].curr = 0; \
 	stack[top].count = count_; \
 	/*printf("container %d count %d stack %d\n",stack[top].obj,count_,top);*/ \
-	/*printf("stack push %d\n", top);*/ \
 	++top; \
 	goto _header_again
 
@@ -306,6 +305,7 @@ _push:
 		if(++c->curr == c->count) {
 			obj = c->obj;
 			--top;
+			msgpack_unpack_callback(_array_end)(user, c->curr, &obj);
 			/*printf("stack pop %d\n", top);*/
 			goto _push;
 		}

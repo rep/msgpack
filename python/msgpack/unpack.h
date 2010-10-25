@@ -21,6 +21,7 @@
 
 typedef struct unpack_user {
     int use_list;
+    PyObject *unpacker;
 } unpack_user;
 
 
@@ -150,6 +151,23 @@ static inline int template_callback_array_item(unpack_user* u, unsigned int curr
         PyList_SET_ITEM(*c, current, o);
     else
         PyTuple_SET_ITEM(*c, current, o);
+    return 0;
+}
+
+static inline int template_callback_array_end(unpack_user* u, unsigned int len, msgpack_unpack_object* c)
+{
+    PyObject *ret;
+
+    if (u->unpacker) {
+        ret = PyObject_CallMethodObjArgs(u->unpacker, PyString_FromString("array_cb"), *c, NULL);
+        if (ret == Py_None)
+            Py_DECREF(ret);
+        else {
+            Py_DECREF(*c);
+            *c = ret;
+        }
+    }
+
     return 0;
 }
 
