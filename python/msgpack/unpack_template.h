@@ -306,7 +306,6 @@ _push:
 			msgpack_unpack_callback(_array_end)(user, &c->obj);
 			obj = c->obj;
 			--top;
-			msgpack_unpack_callback(_array_end)(user, &obj);
 			/*printf("stack pop %d\n", top);*/
 			goto _push;
 		}
@@ -321,7 +320,6 @@ _push:
 			msgpack_unpack_callback(_map_end)(user, &c->obj);
 			obj = c->obj;
 			--top;
-			msgpack_unpack_callback(_map_end)(user, &obj);
 			/*printf("stack pop %d\n", top);*/
 			goto _push;
 		}
