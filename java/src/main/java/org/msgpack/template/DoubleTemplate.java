@@ -23,6 +23,10 @@ import org.msgpack.*;
 public class DoubleTemplate implements Template {
 	private DoubleTemplate() { }
 
+	public void pack(Packer pk, Object target) throws IOException {
+		pk.packDouble(((Double)target));
+	}
+
 	public Object unpack(Unpacker pac) throws IOException, MessageTypeException {
 		return pac.unpackDouble();
 	}
@@ -38,7 +42,7 @@ public class DoubleTemplate implements Template {
 	static final DoubleTemplate instance = new DoubleTemplate();
 
 	static {
-		CustomMessage.registerTemplate(Double.class, instance);
+		CustomMessage.register(Double.class, instance);
 	}
 }
 

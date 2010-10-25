@@ -23,6 +23,10 @@ import org.msgpack.*;
 public class ByteArrayTemplate implements Template {
 	private ByteArrayTemplate() { }
 
+	public void pack(Packer pk, Object target) throws IOException {
+		pk.packByteArray((byte[])target);
+	}
+
 	public Object unpack(Unpacker pac) throws IOException, MessageTypeException {
 		return pac.unpackByteArray();
 	}
@@ -38,7 +42,7 @@ public class ByteArrayTemplate implements Template {
 	static final ByteArrayTemplate instance = new ByteArrayTemplate();
 
 	static {
-		CustomMessage.registerTemplate(byte[].class, instance);
+		CustomMessage.register(byte[].class, instance);
 	}
 }
 

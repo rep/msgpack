@@ -23,6 +23,10 @@ import org.msgpack.*;
 public class FloatTemplate implements Template {
 	private FloatTemplate() { }
 
+	public void pack(Packer pk, Object target) throws IOException {
+		pk.packFloat((Float)target);
+	}
+
 	public Object unpack(Unpacker pac) throws IOException, MessageTypeException {
 		return pac.unpackFloat();
 	}
@@ -38,7 +42,7 @@ public class FloatTemplate implements Template {
 	static final FloatTemplate instance = new FloatTemplate();
 
 	static {
-		CustomMessage.registerTemplate(Float.class, instance);
+		CustomMessage.register(Float.class, instance);
 	}
 }
 

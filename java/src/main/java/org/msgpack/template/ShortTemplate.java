@@ -23,6 +23,10 @@ import org.msgpack.*;
 public class ShortTemplate implements Template {
 	private ShortTemplate() { }
 
+	public void pack(Packer pk, Object target) throws IOException {
+		pk.packShort((Short)target);
+	}
+
 	public Object unpack(Unpacker pac) throws IOException, MessageTypeException {
 		return pac.unpackShort();
 	}
@@ -38,7 +42,7 @@ public class ShortTemplate implements Template {
 	static final ShortTemplate instance = new ShortTemplate();
 
 	static {
-		CustomMessage.registerTemplate(Short.class, instance);
+		CustomMessage.register(Short.class, instance);
 	}
 }
 

@@ -23,6 +23,10 @@ import org.msgpack.*;
 public class StringTemplate implements Template {
 	private StringTemplate() { }
 
+	public void pack(Packer pk, Object target) throws IOException {
+		pk.packString((String)target);
+	}
+
 	public Object unpack(Unpacker pac) throws IOException, MessageTypeException {
 		return pac.unpackString();
 	}
@@ -38,7 +42,7 @@ public class StringTemplate implements Template {
 	static final StringTemplate instance = new StringTemplate();
 
 	static {
-		CustomMessage.registerTemplate(String.class, instance);
+		CustomMessage.register(String.class, instance);
 	}
 }
 
