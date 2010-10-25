@@ -154,12 +154,29 @@ static inline int template_callback_array_item(unpack_user* u, unsigned int curr
     return 0;
 }
 
-static inline int template_callback_array_end(unpack_user* u, unsigned int len, msgpack_unpack_object* c)
+static inline int template_callback_array_end(unpack_user* u, msgpack_unpack_object* c)
 {
     PyObject *ret;
 
     if (u->unpacker) {
         ret = PyObject_CallMethodObjArgs(u->unpacker, PyString_FromString("array_cb"), *c, NULL);
+        if (ret == Py_None)
+            Py_DECREF(ret);
+        else {
+            Py_DECREF(*c);
+            *c = ret;
+        }
+    }
+
+    return 0;
+}
+
+static inline int template_callback_map_end(unpack_user* u, msgpack_unpack_object* c)
+{
+    PyObject *ret;
+
+    if (u->unpacker) {
+        ret = PyObject_CallMethodObjArgs(u->unpacker, PyString_FromString("map_cb"), *c, NULL);
         if (ret == Py_None)
             Py_DECREF(ret);
         else {

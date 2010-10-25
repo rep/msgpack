@@ -267,6 +267,9 @@ cdef class Unpacker(object):
     def array_cb(self, obj):
         return None
 
+    def map_cb(self, obj):
+        return None
+
     def feed(self, bytes next_bytes):
         self.waiting_bytes.append(next_bytes)
 

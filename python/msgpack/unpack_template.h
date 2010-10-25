@@ -305,7 +305,7 @@ _push:
 		if(++c->curr == c->count) {
 			obj = c->obj;
 			--top;
-			msgpack_unpack_callback(_array_end)(user, c->curr, &obj);
+			msgpack_unpack_callback(_array_end)(user, &obj);
 			/*printf("stack pop %d\n", top);*/
 			goto _push;
 		}
@@ -319,6 +319,7 @@ _push:
 		if(--c->count == 0) {
 			obj = c->obj;
 			--top;
+			msgpack_unpack_callback(_map_end)(user, &obj);
 			/*printf("stack pop %d\n", top);*/
 			goto _push;
 		}
