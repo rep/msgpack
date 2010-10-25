@@ -4,43 +4,56 @@
 from nose import main
 from nose.tools import *
 
-from msgpack import packs, unpacks
+from msgpack import Packer, Unpacker, packs, unpacks
 
-def _decode_complex(obj):
-    if '__complex__' in obj:
-        return complex(obj['real'], obj['imag'])
-    return obj
+class ComplexUnpacker(Unpacker):
+	def map_cb(self, obj):
+		if '__complex__' in obj:
+			return complex(obj['real'], obj['imag'])
+		return None
 
-def _encode_complex(obj):
-    if isinstance(obj, complex):
-        return {'__complex__': True, 'real': 1, 'imag': 2}
-    return obj
+class ComplexPacker(Packer):
+	def default(self, obj):
+		if isinstance(obj, complex):
+			return {'__complex__': True, 'real': 1, 'imag': 2}
+		return Packer.default(self, obj)
 
 def test_encode_hook():
-    packed = packs([3, 1+2j], default=_encode_complex)
-    unpacked = unpacks(packed)
-    eq_(unpacked[1], {'__complex__': True, 'real': 1, 'imag': 2})
+	cp = ComplexPacker()
+	packed = cp.pack([3, 1+2j])
+	unpacked = unpacks(packed)
+	eq_(unpacked[1], {'__complex__': True, 'real': 1, 'imag': 2})
 
 def test_decode_hook():
-    packed = packs([3, {'__complex__': True, 'real': 1, 'imag': 2}])
-    unpacked = unpacks(packed, object_hook=_decode_complex)
-    eq_(unpacked[1], 1+2j)
+	cup = ComplexUnpacker()
+	packed = packs([3, {'__complex__': True, 'real': 1, 'imag': 2}])
+	cup.feed(packed)
+	unpacked = cup.unpack()
+	eq_(unpacked[1], 1+2j)
 
 @raises(TypeError)
 def test_bad_hook():
-    packed = packs([3, 1+2j], default=lambda o: o)
-    unpacked = unpacks(packed)
+	cp = Packer()
+	packed = cp.pack([3, 1+2j])
+	unpacked = unpacks(packed)
 
 def _arr_to_str(arr):
-    return ''.join(str(c) for c in arr)
+	return ''.join(str(c) for c in arr)
+
+class ArrayStrUnpacker(Unpacker):
+	def array_cb(self, obj):
+		return ''.join(str(c) for c in obj)
 
 def test_array_hook():
-    packed = packs([1,2,3])
-    unpacked = unpacks(packed, list_hook=_arr_to_str)
-    eq_(unpacked, '123')
+	packed = packs([1,2,3])
+	cup = ArrayStrUnpacker()
+	cup.feed(packed)
+	unpacked = cup.unpack()
+	eq_(unpacked, '123')
 
 if __name__ == '__main__':
     test_decode_hook()
     test_encode_hook()
     test_bad_hook()
     test_array_hook()
+
