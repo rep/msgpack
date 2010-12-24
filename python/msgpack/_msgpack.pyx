@@ -8,6 +8,9 @@ cdef extern from "Python.h":
     cdef PyObject* Py_True
     cdef PyObject* Py_False
     cdef object PyUnicode_AsUTF8String(object)
+    cdef object PyObject_CallMethod(object, char*, char*, ...)
+    cdef object PyObject_HasAttr(object o, object o)
+    cdef object PyString_FromString(const_char_ptr v)
 
     cdef long long PyLong_AsLongLong(object o)
     cdef unsigned long long PyLong_AsUnsignedLongLong(object o)
@@ -126,6 +129,9 @@ cdef class Packer(object):
                 for v in o:
                     ret = self._pack(v)
                     if ret != 0: break
+        elif hasattr(o, "_serialize"):
+            v = PyObject_CallMethod(o, "_serialize", "")
+            ret = self._pack(v)
         else:
             v = self.default(o)
             ret = self._pack(v)
